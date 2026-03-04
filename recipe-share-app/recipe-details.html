@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Детайли на рецепта</title>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <div id="navbar-root"></div>
+
+    <main class="container app-main flex-grow-1">
+      <section class="page-header-card mb-3">
+        <h1 class="h3 mb-1"><i class="bi bi-journal-text me-2"></i>Детайли на рецепта</h1>
+        <p class="text-body-secondary mb-0">Прегледай пълната рецепта, добави коментар и отбележи като любима.</p>
+      </section>
+
+      <div id="config-warning" class="mb-3"></div>
+      <div id="status-message" class="mb-3"></div>
+      <section id="recipe-content"></section>
+
+      <section class="mt-4 section-card">
+        <div class="card-body">
+          <h2 class="h4 mb-3"><i class="bi bi-chat-dots me-2"></i>Коментари</h2>
+          <div id="comment-status" class="mb-3"></div>
+          <div id="comments-list" class="mb-3"></div>
+
+          <form id="comment-form" class="d-none">
+            <div class="mb-2">
+              <label for="content" class="form-label">Добави коментар</label>
+              <textarea id="content" name="content" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="bi bi-send me-1"></i>Публикувай
+            </button>
+          </form>
+          <p class="small text-body-secondary mt-3 mb-0">Бъди учтив в обратната връзка към автора.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer py-3">
+      <div class="container text-center text-body-secondary small">RecipeShare © 2026</div>
+    </footer>
+
+    <script type="module" src="/src/pages/recipeDetails.js"></script>
+  </body>
+</html>

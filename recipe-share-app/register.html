@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Регистрация</title>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <div id="navbar-root"></div>
+
+    <main class="container app-main flex-grow-1">
+      <section class="page-header-card d-flex align-items-start gap-3">
+        <i class="bi bi-person-plus fs-3"></i>
+        <div>
+          <h1 class="h4 mb-1">Създай профил</h1>
+          <p class="text-body-secondary mb-0">Регистрирай се, за да публикуваш рецепти и да участваш в общността.</p>
+        </div>
+      </section>
+
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-9 col-lg-6">
+          <div class="card shadow-sm border-0 section-card">
+            <div class="card-body p-4">
+              <h2 class="h5 section-title"><i class="bi bi-person-vcard"></i>Форма за регистрация</h2>
+              <div id="config-warning" class="mb-3"></div>
+              <div id="status-message" class="mb-3"></div>
+
+              <form id="register-form" novalidate>
+                <div class="mb-3">
+                  <label for="displayName" class="form-label">Име</label>
+                  <input id="displayName" name="displayName" type="text" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label">Имейл</label>
+                  <input id="email" name="email" type="email" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                  <label for="password" class="form-label">Парола</label>
+                  <input id="password" name="password" type="password" class="form-control" minlength="6" required />
+                </div>
+
+                <div class="mb-4">
+                  <label for="confirmPassword" class="form-label">Повтори парола</label>
+                  <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" minlength="6" required />
+                </div>
+
+                <button id="submit-btn" type="submit" class="btn btn-success w-100">
+                  Създай профил
+                </button>
+              </form>
+
+              <div class="auth-hint mt-3 d-flex align-items-center gap-2">
+                <i class="bi bi-check2-circle"></i>
+                <span>След регистрация можеш веднага да влезеш и да добавиш първата си рецепта.</span>
+              </div>
+
+              <p class="small text-center mt-3 mb-0">
+                Имаш профил? <a href="./login.html">Влез</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer py-3">
+      <div class="container text-center text-body-secondary small">RecipeShare © 2026</div>
+    </footer>
+
+    <script type="module" src="/src/pages/register.js"></script>
+  </body>
+</html>

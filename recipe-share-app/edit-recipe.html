@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Редакция на рецепта</title>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <div id="navbar-root"></div>
+
+    <main class="container app-main flex-grow-1">
+      <section class="page-header-card d-flex align-items-start gap-3">
+        <i class="bi bi-pencil-square fs-3"></i>
+        <div>
+          <h1 class="h4 mb-1">Редакция на рецепта</h1>
+          <p class="text-body-secondary mb-0">Актуализирай текста и снимката, за да поддържаш съдържанието си актуално.</p>
+        </div>
+      </section>
+
+      <div class="row justify-content-center">
+        <div class="col-12 col-xl-9">
+          <div class="card shadow-sm border-0 section-card">
+            <div class="card-body p-4 p-lg-5">
+              <h2 class="h5 section-title"><i class="bi bi-sliders"></i>Редактирай полетата</h2>
+              <div id="config-warning" class="mb-3"></div>
+              <div id="status-message" class="mb-3"></div>
+
+              <div id="current-image-container" class="mb-3 d-none">
+                <p class="form-label mb-2">Текуща снимка</p>
+                <img id="current-image" class="img-fluid rounded" alt="Текуща снимка" />
+              </div>
+
+              <form id="recipe-form" novalidate>
+                <div class="mb-3">
+                  <label for="title" class="form-label">Заглавие</label>
+                  <input id="title" name="title" type="text" class="form-control" maxlength="120" required />
+                </div>
+
+                <div class="mb-3">
+                  <label for="category" class="form-label">Категория</label>
+                  <select id="category" name="category" class="form-select" required>
+                    <option value="Закуски">Закуски</option>
+                    <option value="Салати">Салати</option>
+                    <option value="Супи">Супи</option>
+                    <option value="Основни ястия">Основни ястия</option>
+                    <option value="Десерти">Десерти</option>
+                    <option value="Здравословни">Здравословни</option>
+                    <option value="Вегетариански">Вегетариански</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="description" class="form-label">Кратко описание</label>
+                  <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label for="ingredients" class="form-label">Продукти (по един на ред)</label>
+                  <textarea id="ingredients" name="ingredients" class="form-control" rows="5" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label for="instructions" class="form-label">Начин на приготвяне</label>
+                  <textarea id="instructions" name="instructions" class="form-control" rows="7" required></textarea>
+                </div>
+
+                <div class="mb-4">
+                  <label for="image" class="form-label">Нова снимка (по избор)</label>
+                  <input id="image" name="image" type="file" class="form-control" accept="image/*" />
+                </div>
+
+                <button id="submit-btn" type="submit" class="btn btn-success">
+                  <i class="bi bi-check2-circle me-1"></i>Запази промените
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer py-3">
+      <div class="container text-center text-body-secondary small">RecipeShare © 2026</div>
+    </footer>
+
+    <script type="module" src="/src/pages/editRecipe.js"></script>
+  </body>
+</html>

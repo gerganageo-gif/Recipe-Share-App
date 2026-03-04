@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Вход</title>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <div id="navbar-root"></div>
+
+    <main class="container app-main flex-grow-1">
+      <section class="page-header-card d-flex align-items-start gap-3">
+        <i class="bi bi-box-arrow-in-right fs-3"></i>
+        <div>
+          <h1 class="h4 mb-1">Вход в профила</h1>
+          <p class="text-body-secondary mb-0">Достъпи твоите рецепти, любими и админ панела (ако имаш роля).</p>
+        </div>
+      </section>
+
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+          <div class="card shadow-sm border-0 section-card">
+            <div class="card-body p-4">
+              <h2 class="h5 section-title"><i class="bi bi-person-check"></i>Форма за вход</h2>
+              <div id="config-warning" class="mb-3"></div>
+              <div id="status-message" class="mb-3"></div>
+
+              <form id="login-form" novalidate>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Имейл</label>
+                  <input id="email" name="email" type="email" class="form-control" required />
+                </div>
+
+                <div class="mb-4">
+                  <label for="password" class="form-label">Парола</label>
+                  <input id="password" name="password" type="password" class="form-control" minlength="6" required />
+                </div>
+
+                <button id="submit-btn" type="submit" class="btn btn-success w-100">
+                  Вход
+                </button>
+              </form>
+
+              <div class="auth-hint mt-3 d-flex align-items-center gap-2">
+                <i class="bi bi-shield-lock"></i>
+                <span>Сигурна автентикация със Supabase Auth и JWT сесия.</span>
+              </div>
+
+              <p class="small text-center mt-3 mb-0">
+                Нямаш профил? <a href="./register.html">Регистрирай се</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer py-3">
+      <div class="container text-center text-body-secondary small">RecipeShare © 2026</div>
+    </footer>
+
+    <script type="module" src="/src/pages/login.js"></script>
+  </body>
+</html>

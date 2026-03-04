@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RecipeShare</title>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <div id="navbar-root"></div>
+
+    <main class="container app-main flex-grow-1">
+      <section class="hero-card rounded-4 p-4 p-lg-5 mb-4">
+        <div class="row align-items-center g-3">
+          <div class="col-lg-8">
+            <h1 class="display-6 fw-bold mb-2">Споделяй рецепти лесно и бързо</h1>
+            <p class="lead mb-0 text-body-secondary">Създавай, редактирай и откривай вкусни идеи от общността.</p>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <a href="./create-recipe.html" class="btn btn-success btn-lg">
+              <i class="bi bi-plus-circle me-1"></i>Нова рецепта
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <div id="config-warning" class="mb-3"></div>
+
+      <section class="section-card mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h2 class="h5 mb-0"><i class="bi bi-funnel me-2"></i>Търсене и бърз филтър</h2>
+            <span id="active-category-badge" class="badge text-bg-light border d-none"></span>
+          </div>
+
+          <form id="search-form" class="row g-2 mb-3 search-surface" autocomplete="off">
+            <div class="col-12">
+              <div class="small text-body-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-search"></i>
+                <span>Търсене по заглавие или описание</span>
+              </div>
+            </div>
+            <div class="col-12 col-md-8">
+              <label class="visually-hidden" for="search-input">Търсене</label>
+              <input id="search-input" name="search" type="search" class="form-control" placeholder="Търси по заглавие или описание" />
+            </div>
+            <div class="col-12 col-sm-6 col-md-2 d-grid">
+              <button type="submit" class="btn btn-outline-success">
+                <i class="bi bi-search me-1"></i>Търси
+              </button>
+            </div>
+            <div class="col-12 col-sm-6 col-md-2 d-grid">
+              <button id="clear-search-btn" type="button" class="btn btn-outline-secondary d-none">
+                <i class="bi bi-x-circle me-1"></i>Изчисти
+              </button>
+            </div>
+          </form>
+
+          <div class="d-flex align-items-center gap-2 mb-2 text-body-secondary small">
+            <i class="bi bi-funnel"></i>
+            <span>Категории</span>
+          </div>
+          <div id="category-chips" class="category-chip-wrap"></div>
+        </div>
+      </section>
+
+      <section class="section-card mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h2 class="h4 mb-0"><i class="bi bi-stars me-2"></i>Рецепти на седмицата</h2>
+            <span class="badge text-bg-success-subtle border border-success-subtle text-success-emphasis">Подбрани идеи</span>
+          </div>
+          <div id="featured-status" class="mb-2"></div>
+          <div id="featured-grid" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"></div>
+        </div>
+      </section>
+
+      <section class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-grid me-2"></i>Рецепти</h2>
+      </section>
+
+      <div id="status-message" class="mb-3"></div>
+      <div id="recipes-grid" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"></div>
+    </main>
+
+    <footer class="page-footer py-3">
+      <div class="container text-center text-body-secondary small">RecipeShare © 2026</div>
+    </footer>
+
+    <script type="module" src="/src/pages/home.js"></script>
+  </body>
+</html>

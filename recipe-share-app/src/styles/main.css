@@ -1,0 +1,247 @@
+body {
+  min-height: 100vh;
+  background: var(--bs-body-bg);
+}
+
+.app-main {
+  padding-top: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.app-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1040;
+  backdrop-filter: blur(8px);
+}
+
+.page-header-card {
+  border: 1px solid rgba(var(--bs-success-rgb), 0.2);
+  background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.12), rgba(var(--bs-info-rgb), 0.08));
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.section-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 1rem;
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.section-card .card-body {
+  padding: 1.25rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-title .bi,
+.page-header-card .bi {
+  color: rgb(var(--bs-success-rgb));
+}
+
+.hero-card {
+  border: 1px solid rgba(var(--bs-success-rgb), 0.2);
+  background: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.12), rgba(var(--bs-info-rgb), 0.08));
+}
+
+.search-surface {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 1rem;
+  padding: 0.85rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.category-chip-wrap {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.category-chip-link {
+  border-width: 1px;
+  font-weight: 500;
+}
+
+.category-chip-link .chip-count {
+  opacity: 0.8;
+  margin-left: 0.2rem;
+}
+
+.card,
+.btn,
+.form-control,
+.form-select {
+  transition: all 0.2s ease;
+}
+
+.card {
+  border-radius: 1rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.navbar .nav-link {
+  border-radius: 0.5rem;
+  padding-inline: 0.65rem;
+}
+
+.navbar .nav-link.active {
+  background: rgba(var(--bs-success-rgb), 0.14);
+  color: rgb(var(--bs-success-rgb));
+}
+
+.navbar .navbar-brand {
+  letter-spacing: 0.2px;
+}
+
+.form-control:focus,
+.form-select:focus,
+.btn:focus-visible {
+  border-color: rgba(var(--bs-success-rgb), 0.5);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-success-rgb), 0.2);
+}
+
+.recipe-cover {
+  height: 220px;
+  object-fit: cover;
+}
+
+.recipe-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--bs-box-shadow-lg);
+}
+
+.recipe-card .card-title {
+  line-height: 1.3;
+}
+
+.recipe-card .card-text {
+  line-height: 1.45;
+}
+
+.recipe-image-lg {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.recipe-details-card {
+  overflow: hidden;
+}
+
+.content-block {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.85rem;
+  padding: 1rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.comment-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.85rem;
+  background: var(--bs-body-bg);
+}
+
+.moderation-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.85rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.table th {
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.alert {
+  border-radius: 0.85rem;
+}
+
+.auth-hint {
+  background: var(--bs-tertiary-bg);
+  border: 1px dashed var(--bs-border-color);
+  border-radius: 0.85rem;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.page-footer {
+  border-top: 1px solid var(--bs-border-color);
+  background: var(--bs-light-bg-subtle);
+}
+
+@media (max-width: 991.98px) {
+  .app-main {
+    padding-top: 1.2rem;
+    padding-bottom: 2rem;
+  }
+
+  .recipe-cover {
+    height: 200px;
+  }
+
+  .recipe-image-lg {
+    max-height: 340px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .app-main {
+    padding-top: 1rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .hero-card {
+    padding: 1rem !important;
+  }
+
+  .page-header-card {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .search-surface {
+    padding: 0.75rem;
+  }
+
+  .category-chip-wrap {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+  }
+
+  .section-card .card-body {
+    padding: 1rem;
+  }
+
+  .recipe-cover {
+    height: 180px;
+  }
+
+  .recipe-image-lg {
+    max-height: 250px;
+  }
+
+  .display-6 {
+    font-size: 1.7rem;
+  }
+}
