@@ -1,4 +1,4 @@
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import '../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import { APP_NAME, hasSupabaseConfig } from '../config';
 import { renderNavbar } from '../components/navbar';

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RecipeShare</title>
     <link rel="stylesheet" href="../styles/app.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.98.0?bundle"
+        }
+      }
+    </script>
   </head>
   <body class="d-flex flex-column min-vh-100">
     <div id="navbar-root"></div>
@@ -87,6 +94,6 @@
       <div class="container text-center text-body-secondary small">RecipeShare © 2026</div>
     </footer>
 
-    <script type="module" src="/src/pages/home.js"></script>
+    <script type="module" src="./home.js"></script>
   </body>
 </html>
