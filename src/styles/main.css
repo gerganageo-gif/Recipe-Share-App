@@ -106,6 +106,29 @@ body {
   letter-spacing: 0.2px;
 }
 
+.notification-dropdown-menu {
+  width: min(92vw, 380px);
+  max-height: 420px;
+  overflow: hidden;
+}
+
+.notification-dropdown-menu #notifications-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  white-space: normal;
+}
+
+.notification-item-unread {
+  background: rgba(var(--bs-success-rgb), 0.08);
+}
+
+.notification-item .notification-icon {
+  margin-top: 0.1rem;
+}
+
 .form-control:focus,
 .form-select:focus,
 .btn:focus-visible {

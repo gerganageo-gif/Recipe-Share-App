@@ -26,8 +26,8 @@ form?.addEventListener('submit', async (event) => {
   const formData = new FormData(form);
   const displayName = String(formData.get('displayName') || '').trim();
   const email = String(formData.get('email') || '').trim();
-  const password = String(formData.get('password') || '').trim();
-  const confirmPassword = String(formData.get('confirmPassword') || '').trim();
+  const password = String(formData.get('password') || '');
+  const confirmPassword = String(formData.get('confirmPassword') || '');
 
   if (!displayName || !email || !password || !confirmPassword) {
     showInlineMessage(statusMessage, 'Всички полета са задължителни.', 'warning');
@@ -47,8 +47,16 @@ form?.addEventListener('submit', async (event) => {
   submitButton?.setAttribute('disabled', 'disabled');
 
   try {
-    await registerUser({ email, password, displayName });
-    showInlineMessage(statusMessage, 'Регистрацията е успешна. Влез в профила си.', 'success');
+    const registrationData = await registerUser({ email, password, displayName });
+    const requiresConfirmation = !registrationData?.session;
+
+    showInlineMessage(
+      statusMessage,
+      requiresConfirmation
+        ? 'Регистрацията е успешна. Потвърди имейла си от писмото и след това влез в профила.'
+        : 'Регистрацията е успешна. Влез в профила си.',
+      'success'
+    );
     setTimeout(() => {
       window.location.href = './login.html';
     }, 900);

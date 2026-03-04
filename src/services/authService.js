@@ -1,11 +1,26 @@
 import { getSupabaseClient } from './supabaseClient';
 
+function normalizeAuthErrorMessage(message = '') {
+  const normalized = String(message || '').toLowerCase();
+
+  if (normalized.includes('email not confirmed')) {
+    return 'Имейлът не е потвърден. Потвърди регистрацията от писмото и опитай отново.';
+  }
+
+  if (normalized.includes('invalid login credentials')) {
+    return 'Невалиден имейл или парола.';
+  }
+
+  return message;
+}
+
 function normalizeError(error, fallbackMessage) {
   if (!error) {
     return new Error(fallbackMessage);
   }
 
-  return new Error(error.message || fallbackMessage);
+  const message = normalizeAuthErrorMessage(error.message || fallbackMessage);
+  return new Error(message || fallbackMessage);
 }
 
 export async function registerUser({ email, password, displayName }) {
@@ -64,4 +79,22 @@ export async function getCurrentSession() {
 export async function getCurrentUser() {
   const session = await getCurrentSession();
   return session?.user ?? null;
+}
+
+export async function resendSignupConfirmation(email) {
+  const normalizedEmail = String(email || '').trim();
+
+  if (!normalizedEmail) {
+    throw new Error('Въведи имейл, за да изпратим писмо за потвърждение.');
+  }
+
+  const supabase = getSupabaseClient();
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email: normalizedEmail
+  });
+
+  if (error) {
+    throw normalizeError(error, 'Неуспешно повторно изпращане на имейл за потвърждение.');
+  }
 }
