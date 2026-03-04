@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/"
+  to = "/src/pages/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/index.html"
+  to = "/src/pages/index.html"
+  status = 301

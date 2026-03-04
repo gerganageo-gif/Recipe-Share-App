@@ -93,6 +93,11 @@ Then run seed migration to set admin role and demo recipe.
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
 
+### Netlify notes
+- This repo includes `netlify.toml` with the correct build/publish setup.
+- Root URL `/` is redirected to `/src/pages/index.html` in the built output.
+- If styles are missing, verify Netlify uses `dist` as publish directory (not project root).
+
 ## Notes about required GitHub history
 This environment cannot push commits to your GitHub account directly. Use the checklist in `docs/github-commit-plan.md` to satisfy:
 - minimum 15 commits
