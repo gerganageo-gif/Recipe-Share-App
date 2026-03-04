@@ -91,13 +91,12 @@ function renderCategoryChips(counts = {}) {
   }
 
   categoryChips.innerHTML = RECIPE_CATEGORIES
+    .filter((category) => category !== 'Всички')
     .map((category) => {
       const isActive = selectedCategory === category;
       const params = new URLSearchParams();
 
-      if (category !== 'Всички') {
-        params.set('category', category);
-      }
+      params.set('category', category);
 
       if (currentSearchTerm.trim()) {
         params.set('q', currentSearchTerm.trim());

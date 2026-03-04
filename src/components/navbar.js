@@ -94,8 +94,6 @@ export async function renderNavbar() {
             <li class="nav-item dropdown">
               <a class="${categoryNavClass}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Категории</a>
               <ul class="dropdown-menu shadow-sm">
-                <li><a class="dropdown-item ${currentPage === 'all-recipes.html' && !selectedCategory ? 'active' : ''}" href="${categoryLink()}">Всички</a></li>
-                <li><hr class="dropdown-divider"></li>
                 ${categoriesMenu}
               </ul>
             </li>
