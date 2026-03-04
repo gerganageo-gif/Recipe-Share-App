@@ -12,6 +12,7 @@ import {
   toggleRecipeFavorite
 } from '../services/recipeService';
 import { formatDate } from '../utils/formatters';
+import { buildLoginRedirectUrl } from '../utils/authRedirect';
 import { clearInlineMessage, showInlineMessage } from '../utils/notifications';
 import { getQueryParam } from '../utils/query';
 import { escapeHtml, multilineToHtml } from '../utils/safeHtml';
@@ -29,6 +30,7 @@ const commentCancelButton = document.querySelector('#comment-cancel-btn');
 await setupPage({ title: 'Детайли на рецепта' });
 
 const recipeId = getQueryParam('id');
+const favoriteAfterLoginRecipeId = String(getQueryParam('favoriteAfterLogin') || '').trim();
 
 let currentUser = null;
 let currentUserRole = 'user';
@@ -109,6 +111,56 @@ function canDeleteComment(comment) {
   return Boolean(currentUser && (comment.author_id === currentUser.id || canModerate()));
 }
 
+function favoriteButtonClass(isActive) {
+  return isActive
+    ? 'btn btn-danger btn-sm mb-3'
+    : 'btn btn-sm border-danger-subtle bg-danger-subtle text-danger mb-3';
+}
+
+function favoriteButtonContent(isActive, totalFavorites) {
+  return `
+    <i class="bi bi-heart${isActive ? '-fill' : ''} me-1"></i>
+    ${isActive ? 'Премахни от любими' : 'Добави в любими'} (${totalFavorites})
+  `;
+}
+
+function removeFavoriteAfterLoginParam() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (!params.has('favoriteAfterLogin')) {
+    return;
+  }
+
+  params.delete('favoriteAfterLogin');
+  const query = params.toString();
+  const nextUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
+  window.history.replaceState({}, '', nextUrl);
+}
+
+async function applyFavoriteAfterLoginIntent(favoriteButton) {
+  if (!currentUser || !currentRecipe || !favoriteAfterLoginRecipeId) {
+    return;
+  }
+
+  if (favoriteAfterLoginRecipeId !== currentRecipe.id) {
+    return;
+  }
+
+  try {
+    if (!isFavorited) {
+      isFavorited = await toggleRecipeFavorite(currentRecipe.id, currentUser.id, false);
+      favoritesCount = await countRecipeFavorites(currentRecipe.id);
+      favoriteButton.className = favoriteButtonClass(isFavorited);
+      favoriteButton.innerHTML = favoriteButtonContent(isFavorited, favoritesCount);
+      showInlineMessage(statusMessage, 'Рецептата е добавена в любими.', 'success');
+    }
+  } catch (error) {
+    showInlineMessage(statusMessage, error.message, 'danger');
+  } finally {
+    removeFavoriteAfterLoginParam();
+  }
+}
+
 async function loadRecipe(id) {
   if (!contentContainer) {
     return;
@@ -149,6 +201,8 @@ async function loadRecipe(id) {
     const imageUrl = recipe.image_url ? escapeHtml(recipe.image_url) : fallbackImage(recipe.title);
     const authorName = escapeHtml(recipe.author?.display_name || recipe.author?.email || 'Потребител');
     const category = escapeHtml(recipe.category || 'Основни ястия');
+    const favoriteButtonClasses = favoriteButtonClass(isFavorited);
+    const favoriteButtonMarkup = favoriteButtonContent(isFavorited, favoritesCount);
 
     contentContainer.innerHTML = `
       <div class="card shadow-sm border-0 section-card recipe-details-card">
@@ -175,14 +229,9 @@ async function loadRecipe(id) {
             ` : ''}
           </div>
 
-          ${currentUser ? `
-            <button id="favorite-btn" class="btn btn-outline-warning btn-sm mb-3">
-              <i class="bi bi-heart${isFavorited ? '-fill' : ''} me-1"></i>
-              ${isFavorited ? 'Премахни от любими' : 'Добави в любими'} (${favoritesCount})
-            </button>
-          ` : `
-            <p class="small text-body-secondary mb-3"><a href="./login.html">Влез</a>, за да добавяш в любими.</p>
-          `}
+          <button id="favorite-btn" class="${favoriteButtonClasses}">
+            ${favoriteButtonMarkup}
+          </button>
 
           <h2 class="h5 mt-3 section-title"><i class="bi bi-card-text"></i>Описание</h2>
           <div class="content-block mb-3">
@@ -239,24 +288,31 @@ async function loadRecipe(id) {
       });
     }
 
-    if (favoriteButton && currentUser) {
+    if (favoriteButton) {
       favoriteButton.addEventListener('click', async () => {
+        if (!currentUser) {
+          const params = new URLSearchParams(window.location.search);
+          params.set('favoriteAfterLogin', currentRecipe.id);
+          const returnTo = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+          window.location.href = buildLoginRedirectUrl(returnTo);
+          return;
+        }
+
         favoriteButton.setAttribute('disabled', 'disabled');
 
         try {
           isFavorited = await toggleRecipeFavorite(currentRecipe.id, currentUser.id, isFavorited);
           favoritesCount = await countRecipeFavorites(currentRecipe.id);
-
-          favoriteButton.innerHTML = `
-            <i class="bi bi-heart${isFavorited ? '-fill' : ''} me-1"></i>
-            ${isFavorited ? 'Премахни от любими' : 'Добави в любими'} (${favoritesCount})
-          `;
+          favoriteButton.className = favoriteButtonClass(isFavorited);
+          favoriteButton.innerHTML = favoriteButtonContent(isFavorited, favoritesCount);
         } catch (error) {
           showInlineMessage(statusMessage, error.message, 'danger');
         } finally {
           favoriteButton.removeAttribute('disabled');
         }
       });
+
+      await applyFavoriteAfterLoginIntent(favoriteButton);
     }
   } catch (error) {
     contentContainer.innerHTML = '';
@@ -270,7 +326,7 @@ commentActionButton?.addEventListener('click', () => {
   }
 
   if (!currentUser) {
-    window.location.href = './login.html';
+    window.location.href = buildLoginRedirectUrl();
     return;
   }
 
@@ -339,7 +395,7 @@ commentForm?.addEventListener('submit', async (event) => {
   clearInlineMessage(commentStatus);
 
   if (!currentUser || !currentRecipe) {
-    window.location.href = './login.html';
+    window.location.href = buildLoginRedirectUrl();
     return;
   }
 

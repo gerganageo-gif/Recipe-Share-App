@@ -1,6 +1,7 @@
 import { getCurrentUser, signOutUser } from '../services/authService';
 import { getCurrentUserRole } from '../services/roleService';
 import { APP_NAME } from '../config';
+import { buildLoginRedirectUrl } from '../utils/authRedirect';
 import { RECIPE_CATEGORIES } from '../utils/recipeCategories';
 
 function navLinkClass(currentPage, hrefPage) {
@@ -67,8 +68,9 @@ export async function renderNavbar() {
     .join('');
 
   const categoryNavClass = currentPage === 'index.html' && selectedCategory ? 'nav-link dropdown-toggle active' : 'nav-link dropdown-toggle';
-  const myRecipesHref = currentUser ? './my-recipes.html' : './login.html';
-  const profileHref = currentUser ? './profile.html' : './login.html';
+  const loginHref = buildLoginRedirectUrl();
+  const myRecipesHref = currentUser ? './my-recipes.html' : loginHref;
+  const profileHref = currentUser ? './profile.html' : loginHref;
 
   navbarRoot.innerHTML = `
     <nav class="navbar navbar-expand-lg bg-success-subtle border-bottom app-navbar shadow-sm">
@@ -78,7 +80,7 @@ export async function renderNavbar() {
         </a>
         ${!currentUser
           ? `<div class="d-flex align-items-center gap-2 ms-auto me-2 d-lg-none">
-               <a class="btn btn-outline-success btn-sm" href="./login.html">Вход</a>
+               <a class="btn btn-outline-success btn-sm" href="${loginHref}">Вход</a>
                <a class="btn btn-success btn-sm" href="./register.html">Регистрация</a>
              </div>`
           : ''}
@@ -105,7 +107,7 @@ export async function renderNavbar() {
               ? `<span class="small text-body-secondary me-1"><i class="bi bi-person-circle me-1"></i>${displayName}</span>
                 ${roleBadge}
                  <button id="logout-btn" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Изход</button>`
-              : `<a class="btn btn-outline-success btn-sm" href="./login.html">Вход</a>
+              : `<a class="btn btn-outline-success btn-sm" href="${loginHref}">Вход</a>
                  <a class="btn btn-success btn-sm" href="./register.html">Регистрация</a>`}
           </div>
         </div>

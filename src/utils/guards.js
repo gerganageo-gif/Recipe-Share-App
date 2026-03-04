@@ -1,11 +1,12 @@
 import { getCurrentUser } from '../services/authService';
 import { getCurrentUserRole } from '../services/roleService';
+import { buildLoginRedirectUrl } from './authRedirect';
 
-export async function requireAuth(redirectTo = './login.html') {
+export async function requireAuth(redirectTo = null) {
   const user = await getCurrentUser();
 
   if (!user) {
-    window.location.href = redirectTo;
+    window.location.href = redirectTo || buildLoginRedirectUrl();
     return null;
   }
 

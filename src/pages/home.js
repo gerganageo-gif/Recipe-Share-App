@@ -8,6 +8,7 @@ import {
   listRecipes,
   toggleRecipeFavorite
 } from '../services/recipeService';
+import { buildLoginRedirectUrl } from '../utils/authRedirect';
 import { clearInlineMessage, showInlineMessage } from '../utils/notifications';
 import { getQueryParam } from '../utils/query';
 import { normalizeRecipeCategory, RECIPE_CATEGORIES } from '../utils/recipeCategories';
@@ -151,7 +152,7 @@ function updateFavoriteButtonsForRecipe(recipeId, isActive) {
 
 async function handleFavoriteButtonClick(button) {
   if (!currentUser) {
-    window.location.href = './login.html';
+    window.location.href = buildLoginRedirectUrl();
     return;
   }
 
