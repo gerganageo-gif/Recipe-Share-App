@@ -5,6 +5,7 @@ import {
   isRecipeFavorited,
   listFavoriteRecipesByUser,
   listFeaturedRecipes,
+  listRecipes,
   toggleRecipeFavorite
 } from '../services/recipeService';
 import { buildLoginRedirectUrl } from '../utils/authRedirect';
@@ -19,6 +20,8 @@ const searchInput = document.querySelector('#search-input');
 const clearSearchButton = document.querySelector('#clear-search-btn');
 const featuredGrid = document.querySelector('#featured-grid');
 const featuredStatus = document.querySelector('#featured-status');
+const allRecipesGrid = document.querySelector('#all-recipes-grid');
+const allRecipesStatus = document.querySelector('#all-recipes-status');
 const activeCategoryBadge = document.querySelector('#active-category-badge');
 const categoryChips = document.querySelector('#category-chips');
 
@@ -90,7 +93,23 @@ function renderCategoryChips(counts = {}) {
     return;
   }
 
-  categoryChips.innerHTML = RECIPE_CATEGORIES
+  const clearFilterParams = new URLSearchParams();
+
+  if (currentSearchTerm.trim()) {
+    clearFilterParams.set('q', currentSearchTerm.trim());
+  }
+
+  const clearFilterQuery = clearFilterParams.toString();
+  const clearFilterHref = `./all-recipes.html${clearFilterQuery ? `?${clearFilterQuery}` : ''}`;
+  const clearFilterChip = selectedCategory !== 'Всички'
+    ? `
+    <a href="${clearFilterHref}" class="btn btn-sm rounded-pill btn-secondary category-chip-link">
+      <span>Премахни филтъра</span>
+    </a>
+  `
+    : '';
+
+  const categoryChipsMarkup = RECIPE_CATEGORIES
     .filter((category) => category !== 'Всички')
     .map((category) => {
       const isActive = selectedCategory === category;
@@ -114,6 +133,8 @@ function renderCategoryChips(counts = {}) {
       `;
     })
     .join('');
+
+  categoryChips.innerHTML = `${categoryChipsMarkup}${clearFilterChip}`;
 }
 
 async function loadCurrentUserFavorites() {
@@ -321,6 +342,40 @@ async function loadFeatured() {
   }
 }
 
+async function loadAllRecipes() {
+  if (!allRecipesGrid) {
+    return;
+  }
+
+  allRecipesGrid.innerHTML = `
+    <div class="col-12 text-center py-4">
+      <div class="spinner-border text-success" role="status" aria-label="Зареждане"></div>
+    </div>
+  `;
+
+  clearInlineMessage(allRecipesStatus);
+
+  try {
+    const recipes = await listRecipes();
+
+    if (!recipes.length) {
+      allRecipesGrid.innerHTML = '';
+      showInlineMessage(allRecipesStatus, 'Все още няма публикувани рецепти.', 'secondary');
+      return;
+    }
+
+    allRecipesGrid.innerHTML = recipes
+      .map((recipe) => renderRecipeCard(recipe, {
+        showFavoriteAction: true,
+        favoriteActive: favoriteRecipeIds.has(String(recipe.id))
+      }))
+      .join('');
+  } catch (error) {
+    allRecipesGrid.innerHTML = '';
+    showInlineMessage(allRecipesStatus, error.message, 'danger');
+  }
+}
+
 searchForm?.addEventListener('submit', (event) => {
   event.preventDefault();
   currentSearchTerm = String(searchInput?.value || '').trim();
@@ -366,11 +421,17 @@ featuredGrid?.addEventListener('click', (event) => {
   void handleGridClick(event);
 });
 
+allRecipesGrid?.addEventListener('click', (event) => {
+  void handleGridClick(event);
+});
+
 featuredGrid?.addEventListener('keydown', handleGridKeydown);
+allRecipesGrid?.addEventListener('keydown', handleGridKeydown);
 
 await Promise.all([
   loadCategoryCounts(initialSearchTerm),
-  loadFeatured()
+  loadFeatured(),
+  loadAllRecipes()
 ]);
 
 await applyFavoriteAfterLoginIntent();

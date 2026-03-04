@@ -67,7 +67,11 @@ export async function renderNavbar() {
     })
     .join('');
 
-  const categoryNavClass = currentPage === 'all-recipes.html' && selectedCategory ? 'nav-link dropdown-toggle active' : 'nav-link dropdown-toggle';
+  const hasCategoryFilter = Boolean(selectedCategory && selectedCategory !== 'Всички');
+  const clearCategoryFilterItem = hasCategoryFilter
+    ? `<li><a class="dropdown-item" href="${categoryLink()}">Премахни филтъра</a></li><li><hr class="dropdown-divider"></li>`
+    : '';
+  const categoryNavClass = currentPage === 'all-recipes.html' && hasCategoryFilter ? 'nav-link dropdown-toggle active' : 'nav-link dropdown-toggle';
   const loginHref = buildLoginRedirectUrl();
   const myRecipesHref = currentUser ? './my-recipes.html' : loginHref;
   const profileHref = currentUser ? './profile.html' : loginHref;
@@ -94,16 +98,16 @@ export async function renderNavbar() {
             <li class="nav-item dropdown">
               <a class="${categoryNavClass}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Категории</a>
               <ul class="dropdown-menu shadow-sm">
+                ${clearCategoryFilterItem}
                 ${categoriesMenu}
               </ul>
             </li>
             <li class="nav-item"><a class="${navLinkClass(currentPage, 'my-recipes.html')}" href="${myRecipesHref}">Моите рецепти</a></li>
-            <li class="nav-item"><a class="${navLinkClass(currentPage, 'profile.html')}" href="${profileHref}">Моят профил</a></li>
             ${currentUser && currentRole === 'admin' ? `<li class="nav-item"><a class="${navLinkClass(currentPage, 'admin.html')}" href="./admin.html">Админ</a></li>` : ''}
           </ul>
            <div class="${currentUser ? 'd-flex align-items-center gap-2 flex-wrap' : 'd-none d-lg-flex align-items-center gap-2 flex-wrap'}">
             ${currentUser
-              ? `<span class="small text-body-secondary me-1"><i class="bi bi-person-circle me-1"></i>${displayName}</span>
+              ? `<a href="${profileHref}" class="small text-body-secondary me-1 text-decoration-none"><i class="bi bi-person-circle me-1"></i>${displayName}</a>
                 ${roleBadge}
                  <button id="logout-btn" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Изход</button>`
               : `<a class="btn btn-outline-success btn-sm" href="${loginHref}">Вход</a>

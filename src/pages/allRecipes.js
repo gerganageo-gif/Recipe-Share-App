@@ -90,7 +90,23 @@ function renderCategoryChips(counts = {}) {
     return;
   }
 
-  categoryChips.innerHTML = RECIPE_CATEGORIES
+  const clearFilterParams = new URLSearchParams();
+
+  if (currentSearchTerm.trim()) {
+    clearFilterParams.set('q', currentSearchTerm.trim());
+  }
+
+  const clearFilterQuery = clearFilterParams.toString();
+  const clearFilterHref = `./all-recipes.html${clearFilterQuery ? `?${clearFilterQuery}` : ''}`;
+  const clearFilterChip = selectedCategory !== 'Всички'
+    ? `
+    <a href="${clearFilterHref}" class="btn btn-sm rounded-pill btn-secondary category-chip-link">
+      <span>Премахни филтъра</span>
+    </a>
+  `
+    : '';
+
+  const categoryChipsMarkup = RECIPE_CATEGORIES
     .filter((category) => category !== 'Всички')
     .map((category) => {
       const isActive = selectedCategory === category;
@@ -114,6 +130,8 @@ function renderCategoryChips(counts = {}) {
       `;
     })
     .join('');
+
+  categoryChips.innerHTML = `${categoryChipsMarkup}${clearFilterChip}`;
 }
 
 async function loadCurrentUserFavorites() {
