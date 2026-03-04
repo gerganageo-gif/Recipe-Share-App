@@ -22,6 +22,9 @@ const statusMessage = document.querySelector('#status-message');
 const commentsList = document.querySelector('#comments-list');
 const commentForm = document.querySelector('#comment-form');
 const commentStatus = document.querySelector('#comment-status');
+const commentActionButton = document.querySelector('#comment-action-btn');
+const commentInput = document.querySelector('#content');
+const commentCancelButton = document.querySelector('#comment-cancel-btn');
 
 await setupPage({ title: 'Детайли на рецепта' });
 
@@ -48,10 +51,41 @@ async function initializePage(id) {
       currentUserRole = (await getCurrentUserRole().catch(() => 'user')) || 'user';
     }
 
+    syncCommentActionButton();
+
     await Promise.all([loadRecipe(id), loadComments(id)]);
   } catch (error) {
     showInlineMessage(statusMessage, error.message, 'danger');
   }
+}
+
+function syncCommentActionButton() {
+  if (!commentActionButton) {
+    return;
+  }
+
+  commentActionButton.classList.remove('d-none');
+
+  if (currentUser) {
+    commentActionButton.classList.remove('btn-outline-success');
+    commentActionButton.classList.add('btn-success');
+    commentActionButton.innerHTML = '<i class="bi bi-chat-left-text me-1"></i>Добави коментар';
+    return;
+  }
+
+  commentActionButton.classList.remove('btn-success');
+  commentActionButton.classList.add('btn-outline-success');
+  commentActionButton.innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i>Влез за коментар';
+}
+
+function hideCommentForm() {
+  if (!commentForm) {
+    return;
+  }
+
+  commentForm.classList.add('d-none');
+  commentForm.reset();
+  clearInlineMessage(commentStatus);
 }
 
 function fallbackImage(title) {
@@ -173,12 +207,8 @@ async function loadRecipe(id) {
       </div>
     `;
 
-    if (commentForm) {
-      if (currentUser) {
-        commentForm.classList.remove('d-none');
-      } else {
-        commentForm.classList.add('d-none');
-      }
+    if (commentForm && !currentUser) {
+      commentForm.classList.add('d-none');
     }
 
     const deleteButton = document.querySelector('#delete-recipe-btn');
@@ -233,6 +263,24 @@ async function loadRecipe(id) {
     showInlineMessage(statusMessage, error.message, 'danger');
   }
 }
+
+commentActionButton?.addEventListener('click', () => {
+  if (!currentRecipe) {
+    return;
+  }
+
+  if (!currentUser) {
+    window.location.href = './login.html';
+    return;
+  }
+
+  commentForm?.classList.remove('d-none');
+  commentInput?.focus();
+});
+
+commentCancelButton?.addEventListener('click', () => {
+  hideCommentForm();
+});
 
 async function loadComments(id) {
   if (!commentsList) {
@@ -313,8 +361,8 @@ commentForm?.addEventListener('submit', async (event) => {
       content
     });
 
-    commentForm.reset();
     await loadComments(currentRecipe.id);
+    hideCommentForm();
     showInlineMessage(commentStatus, 'Коментарът е публикуван.', 'success');
   } catch (error) {
     showInlineMessage(commentStatus, error.message, 'danger');
