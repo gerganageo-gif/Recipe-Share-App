@@ -1,7 +1,4 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../styles/main.css';
 
 import { APP_NAME, hasSupabaseConfig } from '../config';
 import { renderNavbar } from '../components/navbar';
