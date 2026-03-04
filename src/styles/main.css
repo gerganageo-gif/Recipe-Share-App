@@ -122,6 +122,10 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.recipe-card-clickable {
+  cursor: pointer;
+}
+
 .recipe-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--bs-box-shadow-lg);

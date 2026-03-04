@@ -1,5 +1,13 @@
 import { renderRecipeCard } from '../components/recipeCard';
-import { getRecipeCategoryCounts, listFeaturedRecipes, listRecipes } from '../services/recipeService';
+import { getCurrentUser } from '../services/authService';
+import {
+  getRecipeCategoryCounts,
+  isRecipeFavorited,
+  listFavoriteRecipesByUser,
+  listFeaturedRecipes,
+  listRecipes,
+  toggleRecipeFavorite
+} from '../services/recipeService';
 import { clearInlineMessage, showInlineMessage } from '../utils/notifications';
 import { getQueryParam } from '../utils/query';
 import { normalizeRecipeCategory, RECIPE_CATEGORIES } from '../utils/recipeCategories';
@@ -19,8 +27,11 @@ const selectedCategory = normalizeRecipeCategory(getQueryParam('category') || '�
 const initialSearchTerm = String(getQueryParam('q') || '').trim();
 
 let currentSearchTerm = initialSearchTerm;
+let currentUser = null;
+let favoriteRecipeIds = new Set();
 
 await setupPage({ title: 'Всички рецепти' });
+await loadCurrentUserFavorites();
 
 if (searchInput) {
   searchInput.value = initialSearchTerm;
@@ -92,6 +103,131 @@ function renderCategoryChips(counts = {}) {
     .join('');
 }
 
+async function loadCurrentUserFavorites() {
+  try {
+    currentUser = await getCurrentUser().catch(() => null);
+
+    if (!currentUser) {
+      favoriteRecipeIds = new Set();
+      return;
+    }
+
+    const favoriteRecipes = await listFavoriteRecipesByUser(currentUser.id);
+    favoriteRecipeIds = new Set((favoriteRecipes || []).map((recipe) => String(recipe.id)));
+  } catch {
+    currentUser = null;
+    favoriteRecipeIds = new Set();
+  }
+}
+
+function updateFavoriteButtonsForRecipe(recipeId, isActive) {
+  const encodedId = encodeURIComponent(recipeId);
+  const buttons = document.querySelectorAll(`[data-favorite-id="${encodedId}"]`);
+
+  for (const button of buttons) {
+    button.setAttribute('data-favorite-active', isActive ? 'true' : 'false');
+    button.classList.remove(
+      'btn-outline-warning',
+      'btn-warning',
+      'btn-outline-secondary',
+      'btn-danger',
+      'border-danger-subtle',
+      'bg-danger-subtle',
+      'text-danger'
+    );
+
+    if (isActive) {
+      button.classList.add('btn-danger');
+    } else {
+      button.classList.add('border-danger-subtle', 'bg-danger-subtle', 'text-danger');
+    }
+
+    button.innerHTML = `
+      <i class="bi bi-heart${isActive ? '-fill' : ''} me-1"></i>
+      ${isActive ? 'Премахни от любими' : 'Добави в любими'}
+    `;
+  }
+}
+
+async function handleFavoriteButtonClick(button) {
+  if (!currentUser) {
+    window.location.href = './login.html';
+    return;
+  }
+
+  const recipeId = decodeURIComponent(button.getAttribute('data-favorite-id') || '');
+
+  if (!recipeId) {
+    return;
+  }
+
+  button.setAttribute('disabled', 'disabled');
+
+  try {
+    const currentlyFavorited = await isRecipeFavorited(recipeId, currentUser.id);
+    const nextState = await toggleRecipeFavorite(recipeId, currentUser.id, currentlyFavorited);
+
+    if (nextState) {
+      favoriteRecipeIds.add(String(recipeId));
+    } else {
+      favoriteRecipeIds.delete(String(recipeId));
+    }
+
+    updateFavoriteButtonsForRecipe(recipeId, nextState);
+  } catch (error) {
+    showInlineMessage(statusMessage, error.message, 'danger');
+  } finally {
+    button.removeAttribute('disabled');
+  }
+}
+
+function handleRecipeCardActivation(event) {
+  const card = event.target.closest('[data-recipe-url]');
+
+  if (!card) {
+    return;
+  }
+
+  const recipeUrl = card.getAttribute('data-recipe-url');
+
+  if (recipeUrl) {
+    window.location.href = recipeUrl;
+  }
+}
+
+async function handleGridClick(event) {
+  const favoriteButton = event.target.closest('[data-favorite-id]');
+
+  if (favoriteButton) {
+    event.preventDefault();
+    await handleFavoriteButtonClick(favoriteButton);
+    return;
+  }
+
+  const interactiveElement = event.target.closest('a, button, input, textarea, select, label');
+
+  if (interactiveElement) {
+    return;
+  }
+
+  handleRecipeCardActivation(event);
+}
+
+function handleGridKeydown(event) {
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return;
+  }
+
+  const card = event.target.closest('[data-recipe-url]');
+
+  if (!card) {
+    return;
+  }
+
+  event.preventDefault();
+  handleRecipeCardActivation(event);
+}
+
 async function loadCategoryCounts(searchTerm = '') {
   try {
     const counts = await getRecipeCategoryCounts({ searchTerm });
@@ -133,7 +269,12 @@ async function loadFeatured() {
       return;
     }
 
-    featuredGrid.innerHTML = featuredRecipes.map((recipe) => renderRecipeCard(recipe)).join('');
+    featuredGrid.innerHTML = featuredRecipes
+      .map((recipe) => renderRecipeCard(recipe, {
+        showFavoriteAction: true,
+        favoriteActive: favoriteRecipeIds.has(String(recipe.id))
+      }))
+      .join('');
   } catch (error) {
     featuredGrid.innerHTML = '';
     showInlineMessage(featuredStatus, error.message, 'danger');
@@ -166,7 +307,12 @@ async function loadRecipes(searchTerm = '') {
       return;
     }
 
-    recipesGrid.innerHTML = recipes.map((recipe) => renderRecipeCard(recipe)).join('');
+    recipesGrid.innerHTML = recipes
+      .map((recipe) => renderRecipeCard(recipe, {
+        showFavoriteAction: true,
+        favoriteActive: favoriteRecipeIds.has(String(recipe.id))
+      }))
+      .join('');
   } catch (error) {
     recipesGrid.innerHTML = '';
     showInlineMessage(statusMessage, error.message, 'danger');
@@ -224,6 +370,17 @@ searchInput?.addEventListener('keydown', async (event) => {
 clearSearchButton?.addEventListener('click', async () => {
   await clearSearchAndReload();
 });
+
+recipesGrid?.addEventListener('click', (event) => {
+  void handleGridClick(event);
+});
+
+featuredGrid?.addEventListener('click', (event) => {
+  void handleGridClick(event);
+});
+
+recipesGrid?.addEventListener('keydown', handleGridKeydown);
+featuredGrid?.addEventListener('keydown', handleGridKeydown);
 
 await Promise.all([
   loadCategoryCounts(initialSearchTerm),
