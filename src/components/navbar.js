@@ -56,18 +56,18 @@ export async function renderNavbar() {
     }
 
     const query = params.toString();
-    return `./index.html${query ? `?${query}` : ''}`;
+    return `./all-recipes.html${query ? `?${query}` : ''}`;
   };
 
   const categoriesMenu = RECIPE_CATEGORIES
     .filter((category) => category !== 'Всички')
     .map((category) => {
-      const isActive = currentPage === 'index.html' && selectedCategory === category;
+      const isActive = currentPage === 'all-recipes.html' && selectedCategory === category;
       return `<li><a class="dropdown-item ${isActive ? 'active' : ''}" href="${categoryLink(category)}">${category}</a></li>`;
     })
     .join('');
 
-  const categoryNavClass = currentPage === 'index.html' && selectedCategory ? 'nav-link dropdown-toggle active' : 'nav-link dropdown-toggle';
+  const categoryNavClass = currentPage === 'all-recipes.html' && selectedCategory ? 'nav-link dropdown-toggle active' : 'nav-link dropdown-toggle';
   const loginHref = buildLoginRedirectUrl();
   const myRecipesHref = currentUser ? './my-recipes.html' : loginHref;
   const profileHref = currentUser ? './profile.html' : loginHref;
@@ -90,10 +90,11 @@ export async function renderNavbar() {
         <div class="collapse navbar-collapse" id="main-nav">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item"><a class="${navLinkClass(currentPage, 'index.html')}" href="./index.html">Начало</a></li>
+            <li class="nav-item"><a class="${navLinkClass(currentPage, 'all-recipes.html')}" href="./all-recipes.html">Всички рецепти</a></li>
             <li class="nav-item dropdown">
               <a class="${categoryNavClass}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Категории</a>
               <ul class="dropdown-menu shadow-sm">
-                <li><a class="dropdown-item ${currentPage === 'index.html' && !selectedCategory ? 'active' : ''}" href="${categoryLink()}">Всички</a></li>
+                <li><a class="dropdown-item ${currentPage === 'all-recipes.html' && !selectedCategory ? 'active' : ''}" href="${categoryLink()}">Всички</a></li>
                 <li><hr class="dropdown-divider"></li>
                 ${categoriesMenu}
               </ul>

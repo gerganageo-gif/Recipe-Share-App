@@ -20,8 +20,8 @@
       <section class="hero-card rounded-4 p-4 p-lg-5 mb-4">
         <div class="row align-items-center g-3">
           <div class="col-lg-8">
-            <h1 class="display-6 fw-bold mb-2">Споделяй рецепти лесно и бързо</h1>
-            <p class="lead mb-0 text-body-secondary">Създавай, редактирай и откривай вкусни идеи от общността.</p>
+            <h1 class="display-6 fw-bold mb-2">Всички рецепти</h1>
+            <p class="lead mb-0 text-body-secondary">Разгледай цялата колекция от рецепти на общността.</p>
           </div>
           <div class="col-lg-4 text-lg-end">
             <a href="./create-recipe.html" class="btn btn-success btn-lg">
@@ -71,24 +71,18 @@
         </div>
       </section>
 
-      <div id="status-message" class="mb-3"></div>
-
-      <section class="section-card mb-4">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h2 class="h4 mb-0"><i class="bi bi-stars me-2"></i>Рецепти на седмицата</h2>
-            <span class="badge text-bg-success-subtle border border-success-subtle text-success-emphasis">Подбрани идеи</span>
-          </div>
-          <div id="featured-status" class="mb-2"></div>
-          <div id="featured-grid" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"></div>
-        </div>
+      <section class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-grid me-2"></i>Рецепти</h2>
       </section>
+
+      <div id="status-message" class="mb-3"></div>
+      <div id="recipes-grid" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"></div>
     </main>
 
     <footer class="page-footer py-3">
       <div class="container text-center text-body-secondary small">RecipeShare © 2026</div>
     </footer>
 
-    <script type="module" src="./home.js"></script>
+    <script type="module" src="./allRecipes.js"></script>
   </body>
 </html>

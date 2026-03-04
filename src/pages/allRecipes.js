@@ -4,7 +4,7 @@ import {
   getRecipeCategoryCounts,
   isRecipeFavorited,
   listFavoriteRecipesByUser,
-  listFeaturedRecipes,
+  listRecipes,
   toggleRecipeFavorite
 } from '../services/recipeService';
 import { buildLoginRedirectUrl } from '../utils/authRedirect';
@@ -13,12 +13,11 @@ import { getQueryParam } from '../utils/query';
 import { normalizeRecipeCategory, RECIPE_CATEGORIES } from '../utils/recipeCategories';
 import { setupPage } from './shared';
 
+const recipesGrid = document.querySelector('#recipes-grid');
 const statusMessage = document.querySelector('#status-message');
 const searchForm = document.querySelector('#search-form');
 const searchInput = document.querySelector('#search-input');
 const clearSearchButton = document.querySelector('#clear-search-btn');
-const featuredGrid = document.querySelector('#featured-grid');
-const featuredStatus = document.querySelector('#featured-status');
 const activeCategoryBadge = document.querySelector('#active-category-badge');
 const categoryChips = document.querySelector('#category-chips');
 
@@ -30,7 +29,7 @@ let currentSearchTerm = initialSearchTerm;
 let currentUser = null;
 let favoriteRecipeIds = new Set();
 
-await setupPage({ title: 'Начало' });
+await setupPage({ title: 'Всички рецепти' });
 await loadCurrentUserFavorites();
 
 if (searchInput) {
@@ -51,13 +50,13 @@ function syncClearSearchButtonVisibility() {
 
 syncClearSearchButtonVisibility();
 
-function buildAllRecipesUrl(searchTerm = currentSearchTerm, category = selectedCategory) {
+function updateCatalogUrl(searchTerm) {
   const params = new URLSearchParams(window.location.search);
 
   params.delete('favoriteAfterLogin');
 
-  if (category && category !== 'Всички') {
-    params.set('category', category);
+  if (selectedCategory !== 'Всички') {
+    params.set('category', selectedCategory);
   } else {
     params.delete('category');
   }
@@ -69,7 +68,8 @@ function buildAllRecipesUrl(searchTerm = currentSearchTerm, category = selectedC
   }
 
   const query = params.toString();
-  return `./all-recipes.html${query ? `?${query}` : ''}`;
+  const newUrl = `${window.location.pathname}${query ? `?${query}` : ''}`;
+  window.history.replaceState({}, '', newUrl);
 }
 
 function removeFavoriteAfterLoginParam() {
@@ -147,7 +147,6 @@ async function applyFavoriteAfterLoginIntent() {
 
       if (nextState) {
         favoriteRecipeIds.add(String(favoriteAfterLoginRecipeId));
-        updateFavoriteButtonsForRecipe(favoriteAfterLoginRecipeId, true);
         showInlineMessage(statusMessage, 'Рецептата е добавена в любими.', 'success');
       }
     }
@@ -288,47 +287,56 @@ if (activeCategoryBadge) {
   }
 }
 
-async function loadFeatured() {
-  if (!featuredGrid) {
+async function loadRecipes(searchTerm = '') {
+  if (!recipesGrid) {
     return;
   }
 
-  featuredGrid.innerHTML = `
-    <div class="col-12 text-center py-4">
+  recipesGrid.innerHTML = `
+    <div class="col-12 text-center py-5">
       <div class="spinner-border text-success" role="status" aria-label="Зареждане"></div>
     </div>
   `;
 
-  clearInlineMessage(featuredStatus);
+  clearInlineMessage(statusMessage);
 
   try {
-    const featuredRecipes = await listFeaturedRecipes(3);
+    const recipes = await listRecipes({
+      searchTerm,
+      category: selectedCategory
+    });
 
-    if (!featuredRecipes.length) {
-      featuredGrid.innerHTML = '';
-      showInlineMessage(featuredStatus, 'Все още няма подбрани рецепти за седмицата.', 'secondary');
+    if (!recipes.length) {
+      recipesGrid.innerHTML = '';
+      const categoryLabel = selectedCategory !== 'Всички' ? ` в категория "${selectedCategory}"` : '';
+      showInlineMessage(statusMessage, `Няма намерени рецепти${categoryLabel}. Пробвай друга ключова дума или добави нова рецепта.`, 'secondary');
       return;
     }
 
-    featuredGrid.innerHTML = featuredRecipes
+    recipesGrid.innerHTML = recipes
       .map((recipe) => renderRecipeCard(recipe, {
         showFavoriteAction: true,
         favoriteActive: favoriteRecipeIds.has(String(recipe.id))
       }))
       .join('');
   } catch (error) {
-    featuredGrid.innerHTML = '';
-    showInlineMessage(featuredStatus, error.message, 'danger');
+    recipesGrid.innerHTML = '';
+    showInlineMessage(statusMessage, error.message, 'danger');
   }
 }
 
-searchForm?.addEventListener('submit', (event) => {
+searchForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   currentSearchTerm = String(searchInput?.value || '').trim();
-  window.location.href = buildAllRecipesUrl(currentSearchTerm, selectedCategory);
+  syncClearSearchButtonVisibility();
+  updateCatalogUrl(currentSearchTerm);
+  await Promise.all([
+    loadCategoryCounts(currentSearchTerm),
+    loadRecipes(currentSearchTerm)
+  ]);
 });
 
-function clearSearchInput() {
+async function clearSearchAndReload() {
   currentSearchTerm = '';
 
   if (searchInput) {
@@ -337,6 +345,12 @@ function clearSearchInput() {
   }
 
   syncClearSearchButtonVisibility();
+  updateCatalogUrl(currentSearchTerm);
+
+  await Promise.all([
+    loadCategoryCounts(currentSearchTerm),
+    loadRecipes(currentSearchTerm)
+  ]);
 }
 
 searchInput?.addEventListener('input', () => {
@@ -344,7 +358,7 @@ searchInput?.addEventListener('input', () => {
   syncClearSearchButtonVisibility();
 });
 
-searchInput?.addEventListener('keydown', (event) => {
+searchInput?.addEventListener('keydown', async (event) => {
   if (event.key !== 'Escape') {
     return;
   }
@@ -356,22 +370,22 @@ searchInput?.addEventListener('keydown', (event) => {
   }
 
   event.preventDefault();
-  clearSearchInput();
+  await clearSearchAndReload();
 });
 
-clearSearchButton?.addEventListener('click', () => {
-  clearSearchInput();
+clearSearchButton?.addEventListener('click', async () => {
+  await clearSearchAndReload();
 });
 
-featuredGrid?.addEventListener('click', (event) => {
+recipesGrid?.addEventListener('click', (event) => {
   void handleGridClick(event);
 });
 
-featuredGrid?.addEventListener('keydown', handleGridKeydown);
+recipesGrid?.addEventListener('keydown', handleGridKeydown);
 
 await Promise.all([
   loadCategoryCounts(initialSearchTerm),
-  loadFeatured()
+  loadRecipes(initialSearchTerm)
 ]);
 
 await applyFavoriteAfterLoginIntent();

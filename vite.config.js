@@ -6,6 +6,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: resolve(__dirname, 'src/pages/index.html'),
+        allRecipes: resolve(__dirname, 'src/pages/all-recipes.html'),
         login: resolve(__dirname, 'src/pages/login.html'),
         register: resolve(__dirname, 'src/pages/register.html'),
         createRecipe: resolve(__dirname, 'src/pages/create-recipe.html'),
