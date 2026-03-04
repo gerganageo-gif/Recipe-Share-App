@@ -289,6 +289,77 @@ export async function listRecipesForAdmin(limit = null) {
   return data;
 }
 
+export async function listAdminRecentActivity(limit = null) {
+  const supabase = getSupabaseClient();
+  const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : null;
+
+  let recipesQuery = supabase
+    .from(RECIPES_TABLE)
+    .select(`
+      id,
+      title,
+      created_at,
+      author:profiles!recipes_author_id_fkey(
+        display_name,
+        email
+      )
+    `)
+    .order('created_at', { ascending: false });
+
+  let commentsQuery = supabase
+    .from(COMMENTS_TABLE)
+    .select(`
+      id,
+      content,
+      created_at,
+      author:profiles!recipe_comments_author_id_fkey(
+        display_name,
+        email
+      ),
+      recipe:recipes!recipe_comments_recipe_id_fkey(
+        title
+      )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (safeLimit) {
+    recipesQuery = recipesQuery.limit(safeLimit);
+    commentsQuery = commentsQuery.limit(safeLimit);
+  }
+
+  const [recipesResult, commentsResult] = await Promise.all([recipesQuery, commentsQuery]);
+
+  if (recipesResult.error) {
+    throw ensureError(recipesResult.error, 'Неуспешно зареждане на последни събития (рецепти).');
+  }
+
+  if (commentsResult.error) {
+    throw ensureError(commentsResult.error, 'Неуспешно зареждане на последни събития (коментари).');
+  }
+
+  const recipeEvents = (recipesResult.data || []).map((recipe) => ({
+    id: `recipe-${recipe.id}`,
+    type: 'recipe',
+    created_at: recipe.created_at,
+    actor_name: recipe.author?.display_name || recipe.author?.email || 'Потребител',
+    recipe_title: recipe.title || 'Без заглавие'
+  }));
+
+  const commentEvents = (commentsResult.data || []).map((comment) => ({
+    id: `comment-${comment.id}`,
+    type: 'comment',
+    created_at: comment.created_at,
+    actor_name: comment.author?.display_name || comment.author?.email || 'Потребител',
+    recipe_title: comment.recipe?.title || 'Неизвестна рецепта',
+    content: comment.content || ''
+  }));
+
+  const activity = [...recipeEvents, ...commentEvents]
+    .sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
+
+  return safeLimit ? activity.slice(0, safeLimit) : activity;
+}
+
 export async function isRecipeFavorited(recipeId, userId) {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
