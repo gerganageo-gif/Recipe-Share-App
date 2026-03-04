@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --open /src/pages/index.html",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --open /src/pages/index.html"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",

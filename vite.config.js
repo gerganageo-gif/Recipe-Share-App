@@ -5,15 +5,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        home: resolve(__dirname, 'index.html'),
-        login: resolve(__dirname, 'login.html'),
-        register: resolve(__dirname, 'register.html'),
-        createRecipe: resolve(__dirname, 'create-recipe.html'),
-        recipeDetails: resolve(__dirname, 'recipe-details.html'),
-        editRecipe: resolve(__dirname, 'edit-recipe.html'),
-        myRecipes: resolve(__dirname, 'my-recipes.html'),
-        admin: resolve(__dirname, 'admin.html'),
-        profile: resolve(__dirname, 'profile.html')
+        home: resolve(__dirname, 'src/pages/index.html'),
+        login: resolve(__dirname, 'src/pages/login.html'),
+        register: resolve(__dirname, 'src/pages/register.html'),
+        createRecipe: resolve(__dirname, 'src/pages/create-recipe.html'),
+        recipeDetails: resolve(__dirname, 'src/pages/recipe-details.html'),
+        editRecipe: resolve(__dirname, 'src/pages/edit-recipe.html'),
+        myRecipes: resolve(__dirname, 'src/pages/my-recipes.html'),
+        admin: resolve(__dirname, 'src/pages/admin.html'),
+        profile: resolve(__dirname, 'src/pages/profile.html')
       }
     }
   }
