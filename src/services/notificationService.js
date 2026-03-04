@@ -10,6 +10,21 @@ function ensureError(error, fallbackMessage) {
   return new Error(error.message || fallbackMessage);
 }
 
+function isNotificationsUnavailableError(error) {
+  const message = String(error?.message || '').toLowerCase();
+  const code = String(error?.code || '').toUpperCase();
+
+  if (message.includes('recipe_notifications') && message.includes('schema cache')) {
+    return true;
+  }
+
+  if (message.includes('relation') && message.includes('recipe_notifications') && message.includes('does not exist')) {
+    return true;
+  }
+
+  return code === 'PGRST205' || code === '42P01';
+}
+
 function notificationSelectStatement() {
   return `
     id,
@@ -48,6 +63,10 @@ export async function listMyNotifications(userId, limit = 12) {
   const { data, error } = await query;
 
   if (error) {
+    if (isNotificationsUnavailableError(error)) {
+      return [];
+    }
+
     throw ensureError(error, 'Неуспешно зареждане на известия.');
   }
 
@@ -63,6 +82,10 @@ export async function countMyUnreadNotifications(userId) {
     .eq('is_read', false);
 
   if (error) {
+    if (isNotificationsUnavailableError(error)) {
+      return 0;
+    }
+
     throw ensureError(error, 'Неуспешно зареждане на брой непрочетени известия.');
   }
 
@@ -79,6 +102,10 @@ export async function markNotificationAsRead(notificationId, userId) {
     .eq('is_read', false);
 
   if (error) {
+    if (isNotificationsUnavailableError(error)) {
+      return;
+    }
+
     throw ensureError(error, 'Неуспешно отбелязване на известието като прочетено.');
   }
 }
@@ -92,6 +119,10 @@ export async function markAllNotificationsAsRead(userId) {
     .eq('is_read', false);
 
   if (error) {
+    if (isNotificationsUnavailableError(error)) {
+      return;
+    }
+
     throw ensureError(error, 'Неуспешно отбелязване на известията като прочетени.');
   }
 }
