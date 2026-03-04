@@ -269,13 +269,18 @@ export async function deleteRecipeComment(commentId) {
   }
 }
 
-export async function listRecipesForAdmin(limit = 20) {
+export async function listRecipesForAdmin(limit = null) {
   const supabase = getSupabaseClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from(RECIPES_TABLE)
     .select(recipeSelectStatement())
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    .order('created_at', { ascending: false });
+
+  if (Number.isInteger(limit) && limit > 0) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw ensureError(error, 'Неуспешно зареждане на рецепти за модерация.');

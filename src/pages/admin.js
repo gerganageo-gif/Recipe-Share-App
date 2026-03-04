@@ -6,8 +6,10 @@ import { setupPage } from './shared';
 import { escapeHtml } from '../utils/safeHtml';
 import { formatDate, truncateText } from '../utils/formatters';
 
+const INITIAL_MODERATION_RECIPES_LIMIT = 5;
 const usersRows = document.querySelector('#users-rows');
 const recipesAdminList = document.querySelector('#recipes-admin-list');
+const showAllRecipesButton = document.querySelector('#show-all-recipes-btn');
 const statusMessage = document.querySelector('#status-message');
 
 await setupPage({ title: 'Админ панел' });
@@ -15,6 +17,7 @@ await setupPage({ title: 'Админ панел' });
 let adminUser;
 let users = [];
 let recipes = [];
+let isShowingAllRecipes = false;
 
 try {
   adminUser = await requireAdmin();
@@ -112,17 +115,50 @@ async function loadRecipesForModeration() {
     return;
   }
 
+  if (showAllRecipesButton) {
+    showAllRecipesButton.classList.add('d-none');
+    showAllRecipesButton.setAttribute('disabled', 'disabled');
+  }
+
   recipesAdminList.innerHTML = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-success" role="status"></div></div>';
 
   try {
-    recipes = await listRecipesForAdmin(20);
+    recipes = await listRecipesForAdmin();
 
     if (!recipes.length) {
       recipesAdminList.innerHTML = '<p class="text-body-secondary mb-0">Няма рецепти за модерация.</p>';
+
+      if (showAllRecipesButton) {
+        showAllRecipesButton.classList.add('d-none');
+        showAllRecipesButton.setAttribute('disabled', 'disabled');
+      }
+
       return;
     }
 
-    recipesAdminList.innerHTML = recipes
+    renderModerationRecipes();
+  } catch (error) {
+    recipesAdminList.innerHTML = '<p class="text-danger mb-0">Грешка при зареждане на рецептите.</p>';
+
+    if (showAllRecipesButton) {
+      showAllRecipesButton.classList.add('d-none');
+      showAllRecipesButton.setAttribute('disabled', 'disabled');
+    }
+
+    showInlineMessage(statusMessage, error.message, 'danger');
+  }
+}
+
+function renderModerationRecipes() {
+  if (!recipesAdminList) {
+    return;
+  }
+
+  const visibleRecipes = isShowingAllRecipes
+    ? recipes
+    : recipes.slice(0, INITIAL_MODERATION_RECIPES_LIMIT);
+
+  recipesAdminList.innerHTML = visibleRecipes
       .map((recipe) => `
         <article class="moderation-card p-3">
           <div class="d-flex justify-content-between gap-2 align-items-start">
@@ -140,11 +176,27 @@ async function loadRecipesForModeration() {
         </article>
       `)
       .join('');
-  } catch (error) {
-    recipesAdminList.innerHTML = '<p class="text-danger mb-0">Грешка при зареждане на рецептите.</p>';
-    showInlineMessage(statusMessage, error.message, 'danger');
+
+  if (!showAllRecipesButton) {
+    return;
   }
+
+  const shouldShowButton = !isShowingAllRecipes && recipes.length > INITIAL_MODERATION_RECIPES_LIMIT;
+
+  if (shouldShowButton) {
+    showAllRecipesButton.classList.remove('d-none');
+    showAllRecipesButton.removeAttribute('disabled');
+    return;
+  }
+
+  showAllRecipesButton.classList.add('d-none');
+  showAllRecipesButton.setAttribute('disabled', 'disabled');
 }
+
+showAllRecipesButton?.addEventListener('click', () => {
+  isShowingAllRecipes = true;
+  renderModerationRecipes();
+});
 
 recipesAdminList?.addEventListener('click', async (event) => {
   const deleteButton = event.target.closest('[data-admin-delete-recipe]');
