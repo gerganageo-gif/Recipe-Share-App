@@ -12,20 +12,29 @@ const profileName = document.querySelector('#profile-name');
 const profileEmail = document.querySelector('#profile-email');
 const avatarUrlInput = document.querySelector('#avatarUrl');
 
-await setupPage({ title: 'Моят профил' });
+const setupPagePromise = setupPage({ title: 'Моят профил' }).catch((error) => {
+  showInlineMessage(statusMessage, `Проблем при зареждане на навигацията: ${error.message}`, 'warning');
+});
 
 let currentUser = null;
 
-try {
-  currentUser = await requireAuth();
+await initializeProfilePage();
 
-  if (!currentUser) {
-    return;
+await setupPagePromise;
+
+async function initializeProfilePage() {
+  try {
+    currentUser = await requireAuth();
+
+    if (!currentUser) {
+      showInlineMessage(statusMessage, 'Не е открита активна сесия. Влез отново, за да видиш профилните данни.', 'warning');
+      return;
+    }
+
+    await loadProfile();
+  } catch (error) {
+    showInlineMessage(statusMessage, error.message, 'danger');
   }
-
-  await loadProfile();
-} catch (error) {
-  showInlineMessage(statusMessage, error.message, 'danger');
 }
 
 function updateAvatarPreview(url, name = 'Avatar') {
