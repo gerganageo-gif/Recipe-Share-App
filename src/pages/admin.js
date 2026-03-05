@@ -1,11 +1,10 @@
 import { listRecipesForAdmin, listAdminRecentActivity, listRecipeComments, deleteRecipe, deleteRecipeImage, deleteRecipeComment } from '../services/recipeService';
-import { listUsersWithRoles, updateUserRole } from '../services/roleService';
-import { requireAdmin } from '../utils/guards';
+import { getCurrentUserRole, listUsersWithRoles, updateUserRole } from '../services/roleService';
+import { requireAuth } from '../utils/guards';
 import { clearInlineMessage, showInlineMessage } from '../utils/notifications';
 import { setupPage } from './shared';
 import { escapeHtml, multilineToHtml } from '../utils/safeHtml';
 import { formatDate, truncateText } from '../utils/formatters';
-import Modal from '../../node_modules/bootstrap/js/dist/modal.js';
 
 const INITIAL_MODERATION_RECIPES_LIMIT = 5;
 const RECENT_ACTIVITY_LIMIT = 5;
@@ -25,11 +24,11 @@ const recipePreviewIngredients = document.querySelector('#recipe-preview-ingredi
 const recipePreviewInstructions = document.querySelector('#recipe-preview-instructions');
 const recipePreviewComments = document.querySelector('#recipe-preview-comments');
 const recipePreviewDeleteButton = document.querySelector('#recipe-preview-delete-btn');
-const recipePreviewModal = recipePreviewModalElement
-  ? new Modal(recipePreviewModalElement)
-  : null;
+let recipePreviewModal = null;
 
-await setupPage({ title: 'Админ панел' });
+const setupPagePromise = setupPage({ title: 'Админ панел' }).catch((error) => {
+  showInlineMessage(statusMessage, `Проблем при зареждане на навигацията: ${error.message}`, 'warning');
+});
 
 let adminUser;
 let users = [];
@@ -221,16 +220,60 @@ recipePreviewModalElement?.addEventListener('hidden.bs.modal', () => {
   }
 });
 
-try {
-  adminUser = await requireAdmin();
+await initializeAdminPage();
 
-  if (!adminUser) {
+await setupPagePromise;
+
+async function initializeAdminPage() {
+  try {
+    showInlineMessage(statusMessage, 'Зареждане на админ секциите...', 'info');
+
+    const authenticatedUser = await requireAuth();
+
+    if (!authenticatedUser) {
+      return;
+    }
+
+    const role = await getCurrentUserRole();
+
+    if (role !== 'admin') {
+      showInlineMessage(statusMessage, 'Достъпът до админ панела е само за профили с роля admin.', 'warning');
+      return;
+    }
+
+    adminUser = authenticatedUser;
+
+    initializeRecipePreviewModal();
+
+    if (!adminUser) {
+      return;
+    }
+
+    await Promise.all([loadUsers(), loadRecipesForModeration(), loadRecentActivity()]);
+    clearInlineMessage(statusMessage);
+  } catch (error) {
+    showInlineMessage(statusMessage, error.message, 'danger');
+  }
+}
+
+function initializeRecipePreviewModal() {
+  if (!recipePreviewModalElement) {
     return;
   }
 
-  await Promise.all([loadUsers(), loadRecipesForModeration(), loadRecentActivity()]);
-} catch (error) {
-  showInlineMessage(statusMessage, error.message, 'danger');
+  const modalConstructor = window.bootstrap?.Modal;
+
+  if (!modalConstructor) {
+    return;
+  }
+
+  try {
+    recipePreviewModal = modalConstructor.getOrCreateInstance
+      ? modalConstructor.getOrCreateInstance(recipePreviewModalElement)
+      : new modalConstructor(recipePreviewModalElement);
+  } catch {
+    recipePreviewModal = null;
+  }
 }
 
 async function loadRecentActivity() {

@@ -20,16 +20,20 @@ await setupPage({ title: 'Моите рецепти' });
 let currentUser;
 let loadedRecipes = [];
 
-try {
-  currentUser = await requireAuth();
+await initializeMyRecipesPage();
 
-  if (!currentUser) {
-    return;
+async function initializeMyRecipesPage() {
+  try {
+    currentUser = await requireAuth();
+
+    if (!currentUser) {
+      return;
+    }
+
+    await Promise.all([loadMyRecipes(), loadFavoriteRecipes()]);
+  } catch (error) {
+    showInlineMessage(statusMessage, error.message, 'danger');
   }
-
-  await Promise.all([loadMyRecipes(), loadFavoriteRecipes()]);
-} catch (error) {
-  showInlineMessage(statusMessage, error.message, 'danger');
 }
 
 async function loadMyRecipes() {
