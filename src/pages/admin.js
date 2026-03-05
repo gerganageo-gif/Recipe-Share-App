@@ -5,6 +5,7 @@ import { clearInlineMessage, showInlineMessage } from '../utils/notifications';
 import { setupPage } from './shared';
 import { escapeHtml, multilineToHtml } from '../utils/safeHtml';
 import { formatDate, truncateText } from '../utils/formatters';
+import Modal from 'bootstrap/js/dist/modal';
 
 const INITIAL_MODERATION_RECIPES_LIMIT = 5;
 const RECENT_ACTIVITY_LIMIT = 5;
@@ -24,7 +25,9 @@ const recipePreviewIngredients = document.querySelector('#recipe-preview-ingredi
 const recipePreviewInstructions = document.querySelector('#recipe-preview-instructions');
 const recipePreviewComments = document.querySelector('#recipe-preview-comments');
 const recipePreviewDeleteButton = document.querySelector('#recipe-preview-delete-btn');
-let recipePreviewModal = null;
+const recipePreviewModal = recipePreviewModalElement
+  ? Modal.getOrCreateInstance(recipePreviewModalElement)
+  : null;
 
 const setupPagePromise = setupPage({ title: 'Админ панел' }).catch((error) => {
   showInlineMessage(statusMessage, `Проблем при зареждане на навигацията: ${error.message}`, 'warning');
@@ -243,8 +246,6 @@ async function initializeAdminPage() {
 
     adminUser = authenticatedUser;
 
-    initializeRecipePreviewModal();
-
     if (!adminUser) {
       return;
     }
@@ -253,26 +254,6 @@ async function initializeAdminPage() {
     clearInlineMessage(statusMessage);
   } catch (error) {
     showInlineMessage(statusMessage, error.message, 'danger');
-  }
-}
-
-function initializeRecipePreviewModal() {
-  if (!recipePreviewModalElement) {
-    return;
-  }
-
-  const modalConstructor = window.bootstrap?.Modal;
-
-  if (!modalConstructor) {
-    return;
-  }
-
-  try {
-    recipePreviewModal = modalConstructor.getOrCreateInstance
-      ? modalConstructor.getOrCreateInstance(recipePreviewModalElement)
-      : new modalConstructor(recipePreviewModalElement);
-  } catch {
-    recipePreviewModal = null;
   }
 }
 
